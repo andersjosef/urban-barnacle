@@ -7,34 +7,37 @@ import random
 class GameState():
     def __init__(self, animations):
 
-        ############################# BOARD ####################################################
+        ############################# BOARD and misc ####################################################
 
         # self.board_under = [["1, 4" for x in range(DIMENSION)] for x in range(DIMENSION)]
         # self.board_upper = [["--" for x in range(DIMENSION)] for x in range(DIMENSION)]
         self.curr_map = "start"
         self.load_current_map()
         self.animations = animations
+        self.indicator = self.animations["indicator"]
 
 
         ############################# SPRITES ADDED IN GAME#####################################
         self.figures = {
-                   "witch2": Figure(7, 7, "Witch II", 100, 100, 1, 1,self.animations["witch"], 1, speed=5, animation_cooldown=160),
-                   "witch3": Figure(7, 7, "Witch III", 100, 100, 1, 1,self.animations["witch"], 1, speed=5, animation_cooldown=160),
-                   "mage": Figure(0, 2, "Mage", 100, 100, 1, 1, self.animations["mage"], 2),
-                   "mage2": Figure(0, 2, "Mage II", 100, 100, 1, 1, self.animations["mage2"], 2)
+                   "witch2": (7, 7, "Witch II", 100, 100, 1, 1,self.animations["witch"][:], 1, [], False, 5, 160),
+                   "witch3": (7, 7, "Witch III", 100, 100, 1, 1,self.animations["witch"], 1, [], False, 5, 160),
+                   "mage": (0, 2, "Mage", 100, 100, 1, 1, self.animations["mage"], 2, [], False, 10, 130),
+                   "mage2": (0, 2, "Mage II", 100, 100, 1, 1, self.animations["mage2"], 2, [], False, 10, 130)
                    }
-        self.figures["knight"] = Figure(0, 2, "Knight", 100, 100, 1, 1, self.animations["knight"], 2,crew=[
-                       self.figures["mage"],
-                       self.figures["mage2"]
-                   ] )
-        self.figures["witch"] = Figure(7, 7, "Witch", 100, 100, 1, 1,self.animations["witch"], 1,crew=[
-            self.figures["witch2"],
-            self.figures["witch3"]
-        ], speed=5, animation_cooldown=160)
-        self.hero = self.figures["knight"]
-        self.indicator = self.animations["indicator"]
-        self.current_enemies = [self.figures["witch"]]
-        self.figures["knight"].combat_moves_list.append(CombatMove(0, 0, "test"))
+        self.figures["knight"] = (0, 2, "Knight", 100, 100, 1, 1, self.animations["knight"][:], 2, [], False, 10, 130)
+        self.figures["witch"] =  (7, 7, "Witch", 100, 100, 1, 1,self.animations["witch"], 1, [], False, 5, 160)
+
+
+        self.hero = self.create_figther("knight", 1, 1)
+
+        self.current_enemies = [self.create_figther("knight", 7, 7)]
+        # self.create_enemy_group(["mage", "witch", "witch"])
+
+        # self.current_normal_enemies = [x[0] for x in self.current_enemies]
+        # print(self.current_enemies)
+        # print(self.current_normal_enemies)
+        
+
 
         #################### if in combat it will be a class ###################################
         self.combat = None
@@ -49,6 +52,10 @@ class GameState():
             self.board_under = dic["under"]
             self.board_upper = dic["upper"]
 
+    def create_figther(self, name,x, y):
+        info = self.figures[name]
+        return Figure(x, y, info[2], info[3], info[4], info[5], info[6], info[7], info[8], info[9], info[10], info[11], info[12])
+
     def end_combat(self, settings):
         settings.state = 0
         for fighter in self.combat.allies_and_enemies:
@@ -62,11 +69,17 @@ class GameState():
                 fighter.goal_x = x
             fighter.goal_y = y
 
+    def create_enemy_group(self, enemies_name_list):
+        enemy_group = p.sprite.Group()
+        for name in enemies_name_list:
+            enemy_group.add(self.create_figther(name))
+        self.current_enemies.append(enemy_group)
 
 
 #figure
-class Figure:
+class Figure(pygame.sprite.Sprite):
     def __init__(self, x, y, name, max_hp, strength, potions, scale, animation_list, height, crew=[], flipped=False, speed=10, animation_cooldown=130):
+        pygame.sprite.Sprite.__init__(self)
         self.name = name
         self.max_hp = max_hp
         self.hp = max_hp
@@ -113,14 +126,9 @@ class Figure:
         pass
 
     def flipp(self):
-        if self.flipped:
-            for i_a,action in enumerate(self.animation_list):
-                for i_f, frame in enumerate(action):
-                    self.animation_list[i_a][i_f] = p.transform.flip(self.animation_list[i_a][i_f], True, False)
-        else:
-            for i_a,action in enumerate(self.animation_list):
-                for i_f, frame in enumerate(action):
-                    self.animation_list[i_a][i_f] = p.transform.flip(self.animation_list[i_a][i_f], False, False)
+        for i_a,action in enumerate(self.animation_list):
+            for i_f, frame in enumerate(action):
+                self.animation_list[i_a][i_f] = p.transform.flip(self.animation_list[i_a][i_f], True, False)
 
 
 
@@ -142,7 +150,6 @@ class Figure:
 
     def get_basic_move(self):
         self.combat_moves_list.append(CombatMove())
-
         self.combat_moves_list.append(CombatMove(0, 0, "Run"))
 
 
@@ -157,12 +164,11 @@ class Combat:
         self.turn = self.allies_and_enemies[0]
         self.target = self.get_first_enemy()
         self.ally_turn = True
-        self.turn_enemy_faces()
+        # self.turn_enemy_faces() #does not work atm
 
 
     def turn_enemy_faces(self):
         for enemy in self.enemies:
-            enemy.flipped=True
             enemy.flipp()
 
     def next_turn(self):

@@ -242,7 +242,7 @@ def draw_current_enemies(screen, gs, settings):
 
 def update_normal(gs, settings):
     for enemy in gs.current_enemies:
-        if enemy.x == gs.hero.x and enemy.y == gs.hero.y+SQ_SIZE: #+SQ_SIZE e ein quickfix #transition to combat
+        if enemy.x == gs.hero.x and enemy.y+SQ_SIZE*(enemy.height-1)  == gs.hero.y+SQ_SIZE*(gs.hero.height-1): #+SQ_SIZE e ein quickfix #transition to combat
             settings.state = 1 #initiate combat
             gs.combat = Combat(gs.hero.crew, enemy.crew)
 
@@ -257,7 +257,7 @@ def update_normal(gs, settings):
                     enemy.pos_before_fight = [enemy.x, enemy.y]
                     enemy.in_combat = True
                 enemy.goal_x = 13*SQ_SIZE
-                enemy.goal_y = BOARD_HEIGHT//len(gs.hero.crew) * (i) + SQ_SIZE
+                enemy.goal_y = BOARD_HEIGHT//len(gs.hero.crew) * (i) + SQ_SIZE - (SQ_SIZE*(enemy.height -1))
 
 
 
@@ -265,9 +265,6 @@ def update_normal(gs, settings):
 
 ################ COMBAT ##########################################################
 def event_handler_combat(settings, gs):
-    # global sq_selected
-    # global is_edit_upper
-
     for e in p.event.get():
             if e.type == p.QUIT:
                 settings.running = False
@@ -336,10 +333,6 @@ def draw_target_indicator(screen, gs, settings):
         settings.target_time = p.time.get_ticks()
     if settings.target_show:
         height, width = combatant.animation_list[0][0].get_height(), combatant.animation_list[0][0].get_width() 
-        # s = p.Surface((height, width))
-        # s.set_alpha(100) #transparency value -> 0 transparent; 255 opaque
-        # s.fill(p.Color("red"))
-        # screen.blit(gs.indicator[0], coords)
         screen.blit(combatant.mask_image, coords)
 
 def draw_combat_doing(screen, gs, settings, font):

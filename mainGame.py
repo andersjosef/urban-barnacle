@@ -57,7 +57,7 @@ def main():
     animations["indicator"] = load_sprite_images([1], [(19, 11)])[0]
 
     p.display.set_icon(IMAGES["1, 1"]) #ICON
-    p.display.set_caption("Chess") #TITLE of game
+    p.display.set_caption("RPG STUFF") #TITLE of game
 
     #settings and game engine
     settings = Settings()

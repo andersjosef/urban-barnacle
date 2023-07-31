@@ -37,8 +37,18 @@ def load_sprite_images(num_frames=[4, 5], start_loc=[(8, 4), (8+3, 4)], width=2,
 # sq_selected = () #no square is selected, keep track of last click of the user (tuple; (row, col))
 # is_edit_upper = True
 
+# loadImages() #loading in images
+# animations = {}
+# animations["knight"] = load_sprite_images()
+# animations["witch"] = load_sprite_images([4], [(23, 17)], width=1, height=1)
+# animations["mage"] = load_sprite_images([4, 5], [(8, 8), (11, 8)])
+# animations["mage2"] = load_sprite_images([4, 5], [(8, 10), (11, 10)])
+# animations["indicator"] = load_sprite_images([1], [(19, 11)])[0]
 
 
+# #settings and game engine
+# settings = Settings()
+# gs = GameState(animations)
 def main():
     p.init()
     screen = p.display.set_mode((BOARD_WIDTH + MENU_PANEL_WIDTH, BOARD_HEIGHT))
@@ -83,6 +93,12 @@ def main():
             event_handler_combat(settings, gs)
             draw_combat(screen, gs, font, font_big, settings)
             update_combat(screen, gs, font, settings)
+        elif settings.state == 2: #lost
+            event_handler_lost(settings, gs)
+            draw_lost(screen, gs, settings, font_big)
+            if update_lost(screen, font_big, settings):
+                settings = Settings()
+                gs = GameState(animations)
 
 
         clock.tick(MAX_FPS)
@@ -220,6 +236,8 @@ def draw_current_hero_and_allies(screen, gs):
 def draw_current_enemies(screen, gs, settings):
     enemy_list = gs.combat.main_enemy.crew if settings.state == 1 else gs.current_enemies #changes list to crew if in combat
     for enemy in enemy_list:
+        if type(enemy) == list: #for the nested list of current enemies get the first one in a list
+            enemy = enemy[0]
         screen.blit(enemy.animation_list[enemy.action][enemy.frame_index], (enemy.x, enemy.y))
         
         if p.time.get_ticks() - enemy.update_time > enemy.animation_cooldown:
@@ -242,6 +260,7 @@ def draw_current_enemies(screen, gs, settings):
 
 def update_normal(gs, settings):
     for enemy in gs.current_enemies:
+        enemy = enemy[0]
         if enemy.x == gs.hero.x and enemy.y+SQ_SIZE*(enemy.height-1)  == gs.hero.y+SQ_SIZE*(gs.hero.height-1): #+SQ_SIZE e ein quickfix #transition to combat
             settings.state = 1 #initiate combat
             gs.combat = Combat(gs.hero.crew, enemy.crew)
@@ -257,7 +276,8 @@ def update_normal(gs, settings):
                     enemy.pos_before_fight = [enemy.x, enemy.y]
                     enemy.in_combat = True
                 enemy.goal_x = 13*SQ_SIZE
-                enemy.goal_y = BOARD_HEIGHT//len(gs.hero.crew) * (i) + SQ_SIZE - (SQ_SIZE*(enemy.height -1))
+                enemy.goal_y = BOARD_HEIGHT//len(enemy.crew) * (i) + SQ_SIZE - (SQ_SIZE*(enemy.height -1))
+                # enemy.goal_y = BOARD_HEIGHT//len(enemy.crew) * (i) + SQ_SIZE
 
 
 
@@ -429,15 +449,34 @@ def update_combat(screen, gs, font, settings):
                 settings.state
             elif len(gs.combat.allies) == 0:
                 gs.end_combat(settings)
+                settings.state = 2
                 print("lost")
             else:
                 gs.combat.target = gs.combat.enemies[0] if gs.combat.ally_turn else gs.combat.allies[0] #må fikse en if statement her ens
             
             
 
-        
+##########################################################
+
+############################# Lost #######################  
+def draw_lost(screen, gs, settings, font_big):
+    draw_text(screen, "You were defeated in the Dungeons", font_big, BOARD_WIDTH//2, BOARD_HEIGHT//2//2)
                 
-        
+def event_handler_lost(settings, gs):
+    for e in p.event.get():
+            if e.type == p.QUIT:
+                settings.running = False
+
+def update_lost(screen, font, settings):
+    lost_text = get_text_as_img("Try again?", font)
+    width, height = lost_text.get_width(), lost_text.get_height()
+    s = settings
+    if Button(screen, BOARD_WIDTH//2 - width//2, BOARD_HEIGHT//2, lost_text, 
+              width, height).draw(s):
+        print("pressed")
+        return True
+    return False
+
 
 
 ##########################################################

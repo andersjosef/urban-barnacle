@@ -22,7 +22,7 @@ class Settings:
         self.running = True
         self.sq_selected = () #no square is selected, keep track of last click of the user (tuple; (row, col))
         self.is_edit_upper = True
-        self.state = 0 #0: normal, 1:combat
+        self.state = 0 #0: normal, 1:combat, 2: lost
 
 
         self.action = False

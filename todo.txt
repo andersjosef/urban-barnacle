@@ -1,2 +1,4 @@
 - gjøre enemy list til en nested list med grupper og implementere det slik at hvis en fiende dør vises de andre og ikke forsvinner
 - fikse flipp slik at de som er samme bilder ikke snur seg når kun den ene skal snu seg
+
+- hero crew? muligens ganske wonky atm

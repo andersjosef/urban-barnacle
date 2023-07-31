@@ -30,13 +30,9 @@ class GameState():
 
         self.hero = self.create_figther("knight", 1, 1)
 
-        self.current_enemies = [self.create_figther("knight", 7, 7)]
-        # self.create_enemy_group(["mage", "witch", "witch"])
+        self.current_enemies = []
+        self.create_enemy_group(["mage", "witch"], 7, 7)
 
-        # self.current_normal_enemies = [x[0] for x in self.current_enemies]
-        # print(self.current_enemies)
-        # print(self.current_normal_enemies)
-        
 
 
         #################### if in combat it will be a class ###################################
@@ -69,10 +65,20 @@ class GameState():
                 fighter.goal_x = x
             fighter.goal_y = y
 
-    def create_enemy_group(self, enemies_name_list):
-        enemy_group = p.sprite.Group()
+    def create_enemy_group(self, enemies_name_list,x ,y):
+        enemy_group = []
         for name in enemies_name_list:
-            enemy_group.add(self.create_figther(name))
+            new_figther = self.create_figther(name, x, y)
+            enemy_group.append(new_figther)
+        
+        #add crew to each one
+        for enemy in enemy_group:
+            for other_enemy in enemy_group:
+                if enemy == other_enemy:
+                    pass
+                else:
+                    enemy.crew.append(other_enemy)
+
         self.current_enemies.append(enemy_group)
 
 

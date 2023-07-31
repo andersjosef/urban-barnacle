@@ -28,7 +28,8 @@ class GameState():
         self.figures["witch"] =  (7, 7, "Witch", 100, 100, 1, 1,self.animations["witch"], 1, [], False, 5, 160)
 
 
-        self.hero = self.create_figther("knight", 1, 1)
+        self.current_allies = self.create_ally_group(["knight", "mage"], 1, 1)
+        self.hero = self.current_allies[0]
 
         self.current_enemies = []
         self.create_enemy_group(["mage", "witch"], 7, 7)
@@ -36,6 +37,7 @@ class GameState():
 
 
         #################### if in combat it will be a class ###################################
+        self.enemy_in_combat_index = 0
         self.combat = None
 
         ####################Damage Text Group###################################################
@@ -64,6 +66,9 @@ class GameState():
             else:
                 fighter.goal_x = x
             fighter.goal_y = y
+        self.hero =self.current_allies[0]
+        self.current_enemies.pop(self.combat.enemy_in_combat_index)
+        self.combat = None
 
     def create_enemy_group(self, enemies_name_list,x ,y):
         enemy_group = []
@@ -80,6 +85,22 @@ class GameState():
                     enemy.crew.append(other_enemy)
 
         self.current_enemies.append(enemy_group)
+
+    def create_ally_group(self, allies_name_list,x ,y):
+        ally_group = []
+        for name in allies_name_list:
+            new_figther = self.create_figther(name, x, y)
+            ally_group.append(new_figther)
+        
+        #add crew to each one
+        for ally in ally_group:
+            for other_enemy in ally_group:
+                if ally == other_enemy:
+                    pass
+                else:
+                    ally.crew.append(other_enemy)
+
+        return ally_group
 
 
 #figure
@@ -156,11 +177,14 @@ class Figure(pygame.sprite.Sprite):
 
     def get_basic_move(self):
         self.combat_moves_list.append(CombatMove())
+        self.combat_moves_list.append(CombatMove(0, 0, "Pass"))
         self.combat_moves_list.append(CombatMove(0, 0, "Run"))
 
 
 class Combat:
-    def __init__(self, allies, enemies):
+    def __init__(self, allies, enemies,gs):
+        self.enemy_in_combat_index = gs.current_enemies.index(enemies)
+        print(self.enemy_in_combat_index)
         self.allies = allies
         self.enemies = enemies
         self.main_enemy =  self.enemies[0]
@@ -224,7 +248,7 @@ class Combat:
 
 
 class CombatMove:
-    def __init__(self, damage=50, heal=0, move_name="Kick"):
+    def __init__(self, damage=100, heal=0, move_name="Kick"):
         self.name = move_name
         self.damage = damage
         self.heal = heal

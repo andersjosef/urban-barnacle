@@ -263,7 +263,7 @@ def update_normal(gs, settings):
         enemy = enemy[0]
         if enemy.x == gs.hero.x and enemy.y+SQ_SIZE*(enemy.height-1)  == gs.hero.y+SQ_SIZE*(gs.hero.height-1): #+SQ_SIZE e ein quickfix #transition to combat
             settings.state = 1 #initiate combat
-            gs.combat = Combat(gs.hero.crew, enemy.crew)
+            gs.combat = Combat(gs.hero.crew, enemy.crew, gs)
 
             for i, hero in enumerate(gs.hero.crew):
                 if not hero.in_combat:
@@ -330,6 +330,9 @@ def draw_combat(screen, gs, font, font_big, settings):
 
 def draw_turn_indicator(screen, gs, settings):
     combat = gs.combat
+    if combat.turn_index >= len(combat.allies_and_enemies):
+        combat.turn_index -= 1
+    
     combatant = combat.allies_and_enemies[combat.turn_index]
     coords = (
         combatant.x, 
@@ -444,6 +447,7 @@ def update_combat(screen, gs, font, settings):
                 if fighter_2 == fighter:
                     gs.current_enemies.pop(i)
             if len(gs.combat.enemies) == 0:
+                print(gs.current_enemies)
                 print("won")
                 gs.end_combat(settings)
                 settings.state

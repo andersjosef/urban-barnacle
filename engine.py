@@ -32,7 +32,8 @@ class GameState():
         self.hero = self.current_allies[0]
 
         self.current_enemies = []
-        self.create_enemy_group(["mage", "witch"], 7, 7)
+        self.create_enemy_group(["mage"], 7, 7)
+        self.create_enemy_group(["mage"], 9, 7)
 
 
 
@@ -68,7 +69,7 @@ class GameState():
             fighter.goal_y = y
         self.hero =self.current_allies[0]
         self.current_enemies.pop(self.combat.enemy_in_combat_index)
-        self.combat = None
+        # self.combat = None
 
     def create_enemy_group(self, enemies_name_list,x ,y):
         enemy_group = []

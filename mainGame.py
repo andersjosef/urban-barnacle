@@ -446,6 +446,9 @@ def update_combat(screen, gs, font, settings):
             for i, fighter_2 in enumerate(gs.current_enemies):
                 if fighter_2 == fighter:
                     gs.current_enemies.pop(i)
+            for i, fighter_2 in enumerate(gs.current_allies):
+                if fighter_2 == fighter:
+                    gs.current_allies.pop(i)
             if len(gs.combat.enemies) == 0:
                 print(gs.current_enemies)
                 print("won")

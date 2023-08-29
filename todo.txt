@@ -4,5 +4,4 @@
 
 
 #new features:
-- victory screen med loot og continues
 - vise en liten pause etter at en taper før defeat screen

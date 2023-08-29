@@ -87,7 +87,7 @@ def main():
 
         if settings.state == 0: #normal
             event_handler_normal(settings, gs)
-            draw_normal(screen, gs, settings)
+            draw_normal(screen, gs, settings, font)
             update_normal(gs, settings)
         elif settings.state == 1: # combat
             event_handler_combat(settings, gs)
@@ -99,6 +99,11 @@ def main():
             if update_lost(screen, font_big, settings):
                 settings = Settings()
                 gs = GameState(animations)
+        elif settings.state == 3: #victory combate screen
+            event_handler_vic(settings, gs)
+            draw_vic(screen, gs, settings, font_big, font)
+            if update_vic(screen, font, settings, gs):
+                settings.state = 0
 
 
         clock.tick(MAX_FPS)
@@ -161,11 +166,12 @@ def event_handler_normal(settings, gs):
                 
 ########## Drawing normal ###############
 
-def draw_normal(screen, gs, settings):
+def draw_normal(screen, gs, settings, font):
     draw_background_under(screen, gs)
     draw_current_hero(screen, gs)
     draw_current_enemies(screen, gs, settings)
     draw_background_upper(screen, gs)
+    draw_gold_and_xp(screen, gs, font)
 
 def draw_background_under(screen, gs):
     for y in range(DIMENSION):
@@ -257,6 +263,15 @@ def draw_current_enemies(screen, gs, settings):
                 enemy.x = enemy.goal_x
             if abs(dy) < SQ_SIZE:
                 enemy.y = enemy.goal_y
+
+def draw_gold_and_xp(screen, gs, font):
+    draw_text(screen, f"Gold: {gs.current_player_gold}", font, 
+        BOARD_WIDTH + MENU_PANEL_WIDTH//2,
+        (SQ_SIZE*DIMENSION-SQ_SIZE*2)+SQ_SIZE//2*0)
+    draw_text(screen, f"XP: {gs.current_player_xp}", font, 
+        BOARD_WIDTH + MENU_PANEL_WIDTH//2,
+        (SQ_SIZE*DIMENSION-SQ_SIZE*2)+SQ_SIZE//2*1)
+
 
 def update_normal(gs, settings):
     for enemy in gs.current_enemies:
@@ -433,6 +448,8 @@ def update_combat(screen, gs, font, settings):
     for i, fighter in enumerate(gs.combat.allies_and_enemies):
         fighter.update()
         if not fighter.alive:
+            gs.combat.loot_xp_earned += fighter.loot_xp
+            gs.combat.loot_gold_earned += fighter.loot_gold
             gs.combat.allies_and_enemies.pop(i)
             for i, figther_2 in enumerate(gs.combat.enemies):
                 if figther_2 == fighter:
@@ -453,7 +470,7 @@ def update_combat(screen, gs, font, settings):
                 print(gs.current_enemies)
                 print("won")
                 gs.end_combat(settings)
-                settings.state
+                settings.state = 3
             elif len(gs.combat.allies) == 0:
                 gs.end_combat(settings)
                 settings.state = 2
@@ -480,6 +497,35 @@ def update_lost(screen, font, settings):
     s = settings
     if Button(screen, BOARD_WIDTH//2 - width//2, BOARD_HEIGHT//2, lost_text, 
               width, height).draw(s):
+        print("pressed")
+        return True
+    return False
+
+##########################################################
+
+##################### Combat Victory Screen ##############
+
+def draw_vic(screen, gs, settings, font_big, font):
+    draw_text(screen, "Battle Won!", font_big, BOARD_WIDTH//2, BOARD_HEIGHT//2//2)
+    draw_text(screen, f"gold earned: {gs.combat.loot_gold_earned}", font, BOARD_WIDTH//2, BOARD_HEIGHT//2//1.55) #just for show atm
+    draw_text(screen, f"XP earned: {gs.combat.loot_xp_earned}", font, BOARD_WIDTH//2, BOARD_HEIGHT//2//1.7) #just for show atm
+                
+def event_handler_vic(settings, gs):
+    for e in p.event.get():
+            if e.type == p.QUIT:
+                settings.running = False
+
+def update_vic(screen, font, settings, gs):
+    vic_text = get_text_as_img("Continue", font)
+    if not settings.combat_gotten_xp:
+        gs.current_player_xp += gs.combat.loot_xp_earned
+        gs.current_player_gold += gs.combat.loot_gold_earned
+        settings.combat_gotten_xp = True
+    width, height = vic_text.get_width(), vic_text.get_height()
+    s = settings
+    if Button(screen, BOARD_WIDTH//2 - width//2, BOARD_HEIGHT//2, vic_text, 
+              width, height).draw(s):
+        settings.combat_gotten_xp = False
         print("pressed")
         return True
     return False

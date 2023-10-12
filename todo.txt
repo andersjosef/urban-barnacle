@@ -5,3 +5,7 @@
 
 #new features:
 - vise en liten pause etter at en taper før defeat screen
+- enemies i jsonfilen slit at det blir levels?
+- shop
+- item system?
+- 

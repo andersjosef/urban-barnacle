@@ -301,6 +301,7 @@ def update_normal(gs, settings):
                 enemy.goal_x = 13*SQ_SIZE
                 enemy.goal_y = BOARD_HEIGHT//len(enemy.crew) * (i) + SQ_SIZE - (SQ_SIZE*(enemy.height -1))
                 # enemy.goal_y = BOARD_HEIGHT//len(enemy.crew) * (i) + SQ_SIZE
+    gs.change_map()
 
 
 

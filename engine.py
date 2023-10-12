@@ -9,50 +9,73 @@ class GameState():
         ############################ Player Stuff ##################
         self.current_player_xp = 0
         self.current_player_gold = 0
+        
 
+        self.immune_to_border = False
 
         ############################# BOARD and misc ####################################################
 
         # self.board_under = [["1, 4" for x in range(DIMENSION)] for x in range(DIMENSION)]
         # self.board_upper = [["--" for x in range(DIMENSION)] for x in range(DIMENSION)]
         self.curr_map = "start"
-        self.load_current_map()
         self.animations = animations
         self.indicator = self.animations["indicator"]
-
-        ############################# SPRITES ADDED IN GAME#####################################
         self.figures = {
                    "witch2": (7, 7, "Witch II", 100, 100, 1, 1,self.animations["witch"][:], 1, [], False, 5, 160, 50, 50),
                    "witch3": (7, 7, "Witch III", 100, 100, 1, 1,self.animations["witch"], 1, [], False, 5, 160, 50, 50),
                    "mage": (0, 2, "Mage", 100, 100, 1, 1, self.animations["mage"], 2, [], False, 10, 130, 50, 50),
                    "mage2": (0, 2, "Mage II", 100, 100, 1, 1, self.animations["mage2"], 2, [], False, 10, 130, 50, 50)
                    }
-        self.figures["knight"] = (0, 2, "Knight", 100, 100, 1, 1, self.animations["knight"][:], 2, [], False, 10, 130, 50, 50)
+        self.figures["knight"] = (2, 4, "Knight", 100, 100, 1, 1, self.animations["knight"][:], 2, [], False, 10, 130, 50, 50)
         self.figures["witch"] =  (7, 7, "Witch", 100, 100, 1, 1,self.animations["witch"], 1, [], False, 5, 160, 50, 50)
-
-
-        self.current_allies = self.create_ally_group(["knight", "mage"], 1, 1)
-        self.hero = self.current_allies[0]
-
         self.current_enemies = []
-        self.create_enemy_group(["mage", "mage2"], 7, 7)
-        self.create_enemy_group(["mage"], 9, 7)
+
+        ###################### Map and enemy pos info ################################
+        self.level = 1
+        self.map = [0, 0]
+        self.borders_exist = [False, False, False, False] # top, right, bottom, left
 
 
+        self.info_file = self.load_current_map(str(self.level), self.map) 
+
+        ############################# SPRITES ADDED IN GAME#####################################
+
+        self.current_allies = self.create_ally_group(["knight", "mage"], 2, 2)
+        self.hero = self.current_allies[0]
 
         #################### if in combat it will be a class ###################################
         self.enemy_in_combat_index = 0
         self.combat = None
 
-        ####################Damage Text Group###################################################
+        #################### Damage Text Group ###################################################
         self.damage_text_group = pygame.sprite.Group()
 
 
-    def load_current_map(self):
-        with open(f"data/maps/{self.curr_map}.json", "r") as infile:
+    def load_current_map(self, level, map):
+        # with open(f"data/maps/{self.curr_map}.json", "r") as infile:
+        cur_map = f"{map[0]}, {map[1]}"
+        with open(f"data/maps/test.json", "r") as infile:
             dic =json.load(infile)
-            self.board_under = dic["under"]
-            self.board_upper = dic["upper"]
+            self.check_borders_exist(dic[level], map)
+            self.board_under = dic[level][cur_map]["under"]
+            self.board_upper = dic[level][cur_map]["upper"]
+
+            self.current_enemies = [] # remove enemies from previous maps
+            for enemies in dic[level][cur_map]["enemies"]:
+                x, y = enemies["pos"]
+                self.create_enemy_group(enemies["members"], x, y)
+        return dic
+    def check_borders_exist(self, dic, map):
+        for key in dic:
+            x, y = int(key[0]), int(key[-1])
+            if x == map[0] and y == map[1]+1: #up
+                self.borders_exist[0] = True
+            elif x == map[0] and y == map[1]-1: #down
+                self.borders_exist[2] = True
+            elif x == map[0]+1 and y == map[1]: #right
+                self.borders_exist[1] = True
+            elif x == map[0]-1 and y == map[1]: #left
+                self.borders_exist[3] = True
 
     def create_figther(self, name,x, y):
         info = self.figures[name]
@@ -110,6 +133,42 @@ class GameState():
 
         return ally_group
 
+    def change_map(self):
+        action = False
+        if not self.immune_to_border:
+            if self.hero.x + 50 == BOARD_WIDTH and self.borders_exist[1]: # right
+                self.immune_to_border = True
+                self.map[0] += 1
+                action = True
+                print("going to right")
+            if self.hero.x + 50 <= 50 and self.borders_exist[1]: # left
+                self.immune_to_border = True
+                self.map[0] -= 1
+                action = True
+            elif self.hero.y + 100 == BOARD_WIDTH and self.borders_exist[2]: # down
+                self.immune_to_border = True
+                self.map[1] -= 1
+                self.hero.y = -50
+                self.hero.goal_y = -50
+                action = True
+            elif self.hero.y + 100 <= 50 and self.borders_exist[0]: # up
+                self.immune_to_border = True
+                self.map[1] += 1
+                self.hero.y = 700
+                self.hero.goal_y = 700
+                action = True
+            if action:
+                self.borders_exist = [False, False, False, False]
+                self.info_file = self.load_current_map(str(self.level), self.map)
+        else:
+            if self.hero.x >= 50 and self.hero.x <= 700:
+                if self.hero.y >= 0 and self.hero.y <= 650:
+                    print(self.hero.x, self.hero.x)
+                    print("not at edges")
+                    self.immune_to_border = False
+
+            
+                
 
 #figure
 class Figure(pygame.sprite.Sprite):
@@ -131,6 +190,8 @@ class Figure(pygame.sprite.Sprite):
         self.update_time = p.time.get_ticks()
         self.x = x*SQ_SIZE
         self.y = y*SQ_SIZE - (self.animation_list[0][0].get_height())*(height -1) #hvis en figur ikke dukker opp på rett brikke se mer på dette
+        self.tile_x = x #tile er for grensekontroll og når bytte map
+        self.tile_y = y
         self.goal_x = x*SQ_SIZE
         self.goal_y = y*SQ_SIZE - (self.animation_list[0][0].get_height())*(height -1) #hvis en figur ikke dukker opp på rett brikke se mer på dette
         self.animation_cooldown = animation_cooldown

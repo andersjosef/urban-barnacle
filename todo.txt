@@ -1,11 +1,1 @@
-- fikse flipp slik at de som er samme bilder ikke snur seg når kun den ene skal snu seg
 
-
-
-
-#new features:
-- vise en liten pause etter at en taper før defeat screen
-- enemies i jsonfilen slit at det blir levels?
-- shop
-- item system?
-- 

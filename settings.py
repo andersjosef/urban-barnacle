@@ -49,5 +49,6 @@ class Settings:
         self.text_2 = ""
         self.text_3 = ""
 
-
         self.combat_gotten_xp = False
+
+        self.fullscreen = False

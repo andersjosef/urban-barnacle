@@ -86,7 +86,7 @@ def main():
         draw_menu_border(screen, gs)
 
         if settings.state == 0: #normal
-            event_handler_normal(settings, gs)
+            event_handler_normal(settings, gs, screen)
             draw_normal(screen, gs, settings, font)
             update_normal(gs, settings)
         elif settings.state == 1: # combat
@@ -111,7 +111,7 @@ def main():
 
 
 ###### normal event handler ###########
-def event_handler_normal(settings, gs):
+def event_handler_normal(settings, gs, screen):
     # global sq_selected
     # global is_edit_upper
 
@@ -162,6 +162,16 @@ def event_handler_normal(settings, gs):
                         }
                     with open(f"data/maps/{inp}.json", "w") as outfile:
                         json.dump(dic, outfile)
+                elif e.key == p.K_i: #toggle fullscreen
+                    print("press i")
+                    if not settings.fullscreen:
+                        screen = p.display.set_mode((BOARD_WIDTH + MENU_PANEL_WIDTH, BOARD_HEIGHT), pygame.FULLSCREEN)
+                        settings.fullscreen = True
+                    else:
+                        screen = p.display.set_mode((BOARD_WIDTH + MENU_PANEL_WIDTH, BOARD_HEIGHT))
+                        settings.fullscreen = False
+                    print(settings.fullscreen)
+
 
                 
 ########## Drawing normal ###############

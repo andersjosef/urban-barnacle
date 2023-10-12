@@ -163,14 +163,12 @@ def event_handler_normal(settings, gs, screen):
                     with open(f"data/maps/{inp}.json", "w") as outfile:
                         json.dump(dic, outfile)
                 elif e.key == p.K_i: #toggle fullscreen
-                    print("press i")
                     if not settings.fullscreen:
                         screen = p.display.set_mode((BOARD_WIDTH + MENU_PANEL_WIDTH, BOARD_HEIGHT), pygame.FULLSCREEN)
                         settings.fullscreen = True
                     else:
                         screen = p.display.set_mode((BOARD_WIDTH + MENU_PANEL_WIDTH, BOARD_HEIGHT))
                         settings.fullscreen = False
-                    print(settings.fullscreen)
 
 
                 
@@ -477,7 +475,6 @@ def update_combat(screen, gs, font, settings):
                 if fighter_2 == fighter:
                     gs.current_allies.pop(i)
             if len(gs.combat.enemies) == 0:
-                print(gs.current_enemies)
                 print("won")
                 gs.end_combat(settings)
                 settings.state = 3
@@ -507,7 +504,6 @@ def update_lost(screen, font, settings):
     s = settings
     if Button(screen, BOARD_WIDTH//2 - width//2, BOARD_HEIGHT//2, lost_text, 
               width, height).draw(s):
-        print("pressed")
         return True
     return False
 
@@ -536,7 +532,6 @@ def update_vic(screen, font, settings, gs):
     if Button(screen, BOARD_WIDTH//2 - width//2, BOARD_HEIGHT//2, vic_text, 
               width, height).draw(s):
         settings.combat_gotten_xp = False
-        print("pressed")
         return True
     return False
 

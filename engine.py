@@ -139,11 +139,15 @@ class GameState():
             if self.hero.x + 50 == BOARD_WIDTH and self.borders_exist[1]: # right
                 self.immune_to_border = True
                 self.map[0] += 1
+                self.hero.x = 0
+                self.hero.goal_x = 0
                 action = True
                 print("going to right")
             if self.hero.x + 50 <= 50 and self.borders_exist[1]: # left
                 self.immune_to_border = True
                 self.map[0] -= 1
+                self.hero.x = 750
+                self.hero.goal_x = 750
                 action = True
             elif self.hero.y + 100 == BOARD_WIDTH and self.borders_exist[2]: # down
                 self.immune_to_border = True
@@ -163,8 +167,6 @@ class GameState():
         else:
             if self.hero.x >= 50 and self.hero.x <= 700:
                 if self.hero.y >= 0 and self.hero.y <= 650:
-                    print(self.hero.x, self.hero.x)
-                    print("not at edges")
                     self.immune_to_border = False
 
             

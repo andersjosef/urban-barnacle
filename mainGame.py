@@ -104,6 +104,10 @@ def main():
             draw_vic(screen, gs, settings, font_big, font)
             if update_vic(screen, font, settings, gs):
                 settings.state = 0
+        elif settings.state == 4: # map
+            screen.fill((0, 0, 100), (0, 0, BOARD_WIDTH, BOARD_HEIGHT))
+            event_handler_map(settings, gs) # må endres senere!!
+            draw_map(screen, gs)
 
 
         clock.tick(MAX_FPS)
@@ -169,6 +173,10 @@ def event_handler_normal(settings, gs, screen):
                     else:
                         screen = p.display.set_mode((BOARD_WIDTH + MENU_PANEL_WIDTH, BOARD_HEIGHT))
                         settings.fullscreen = False
+                elif e.key == p.K_TAB:
+                    settings.state = 4 if settings.state == 0 else 0
+          
+
 
 
                 
@@ -536,6 +544,44 @@ def update_vic(screen, font, settings, gs):
         return True
     return False
 
+##########################################################
+
+##################### Map/TAB-menu #######################
+
+def draw_map(screen, gs):
+    width = 50
+    x, y = BOARD_WIDTH // 2 -width//2, BOARD_WIDTH // 2 -width//2
+    # p.draw.rect(screen, "black", (x, y, width, width)) 
+    for map in gs.map_dict[gs.curr_level]:
+        map_x = int(map[0])
+        map_y = int(map[-1])
+        color = "red" if map == gs.curr_map else "black"
+        draw_rect_with_borders(screen, color, "white", x+map_x*width, y-map_y*width, width, width)
+
+def draw_rect_with_borders(screen, color, color_border, x, y, width, height):
+    p.draw.rect(screen, color, (x,y,width,height), 0)
+    for i in range(4):
+        p.draw.rect(screen, color_border, (x-i,y-i,width,height), 1)
+
+def event_handler_map(settings, gs):
+    # global sq_selected
+    # global is_edit_upper
+
+    for e in p.event.get():
+            if e.type == p.QUIT:
+                settings.running = False
+            
+            #mouseclicks
+            # elif e.type == p.MOUSEBUTTONDOWN:
+            #    pass
+
+            #keyboardpresses
+            elif e.type == p.KEYDOWN:
+
+                if e.key == p.K_TAB:
+                    settings.state = 4 if settings.state == 0 else 0
+          
+
 
 
 ##########################################################
@@ -551,6 +597,7 @@ def draw_menu_border(screen, gs):
         screen.blit(p.transform.rotate(IMAGES["0, 8"], 90), (BOARD_WIDTH + i*SQ_SIZE, 0))
     for i in range(MENU_SIZE):#lower
         screen.blit(p.transform.rotate(IMAGES["0, 8"], 270), (BOARD_WIDTH + i*SQ_SIZE, BOARD_HEIGHT-SQ_SIZE))
+
 
 
 

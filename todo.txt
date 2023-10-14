@@ -5,3 +5,7 @@ todo
 - items
 - invulnerable when animation
 - enemies fjernes når de er tatt fra dic (json kun første gang og så fra dict?)
+- editor can add enemies
+- rydde litt opp i map/curr_map...
+
+- legge til en 3. invis layer med blocker en ikke kan gå igjennom

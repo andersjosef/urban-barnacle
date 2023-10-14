@@ -1,7 +1,7 @@
 todo
 
-- json to include monsters and nearby maps somehow
 - shop
 - inventory
 - items
 - invulnerable when animation
+- enemies fjernes når de er tatt fra dic (json kun første gang og så fra dict?)

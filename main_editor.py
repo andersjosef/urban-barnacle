@@ -6,8 +6,12 @@ from settings import *
 from spritesheet import *
 from editorEngine import *
 import json
+from mainGame import draw_text, get_text_as_img
+from button import *
 
 original_image = p.transform.scale(p.image.load("images/Pics.png"), (512, 512) )
+
+
 
 image = SpriteSheet(original_image)
 def loadImages():
@@ -19,11 +23,11 @@ def loadImages():
 
 # global variables
 sq_selected = () #no square is selected, keep track of last click of the user (tuple; (row, col))
-is_edit_upper = True
 
 
 def main():
     p.init()
+    font = p.font.SysFont("Helvetica", 16, True, False) #12 size original 16 good
     screen = p.display.set_mode((BOARD_WIDTH + EDIT_PANEL_WIDTH, BOARD_HEIGHT))
     clock = p.time.Clock()
 
@@ -46,12 +50,15 @@ def main():
 
     while settings.running:
         
-        screen.fill((79, 161, 101), (0, 0, BOARD_WIDTH, BOARD_HEIGHT))
-
-        event_handler(settings, gs)
-
-        draw(screen, gs)
-
+        if settings.state == 0: # normal
+            screen.fill((79, 161, 101), (0, 0, BOARD_WIDTH, BOARD_HEIGHT))
+            event_handler(settings, gs)
+            draw(screen, gs, font, settings.is_edit_upper)
+        if settings.state == 3: # map
+            screen.fill((0, 0, 100), (0, 0, BOARD_WIDTH, BOARD_HEIGHT))
+            event_handler(settings, gs) # må endres senere!!
+            draw_map(screen, gs)
+            map_menu(screen, font, gs, settings)
 
         clock.tick(MAX_FPS)
         p.display.flip()  
@@ -101,21 +108,44 @@ def event_handler(settings, gs):
                     settings.is_edit_upper = False
                 elif e.key == p.K_2:
                     settings.is_edit_upper = True
-
                 elif e.key == p.K_s:
-                    # inp = input("name of file")
-                    inp = "start"
-                    dic = {"under": gs.board_under, "upper": gs.board_upper}
-                    with open(f"data/maps/{inp}.json", "w") as outfile:
-                        json.dump(dic, outfile)
+                    inp = input("are you sure?  y/n-->")
+                    if inp.lower() == "y":
+                        gs.map_dict[gs.curr_level][gs.curr_map]["upper"] = gs.board_upper
+                        gs.map_dict[gs.curr_level][gs.curr_map]["under"] = gs.board_under
+                        with open(f"data/maps/test.json", "w") as outfile:
+                            json.dump(gs.map_dict, outfile)
+                        print(f"saved map to level: {gs.curr_level}, map: {gs.curr_map}")
 
-                
+                elif e.key == p.K_TAB:
+                    settings.state = 3 if settings.state == 0 else 0
+
+def event_handler_map(settings, gs):
+    # global sq_selected
+    # global is_edit_upper
+
+    for e in p.event.get():
+            if e.type == p.QUIT:
+                settings.running = False
+            
+            #mouseclicks
+            # elif e.type == p.MOUSEBUTTONDOWN:
+            #    pass
+
+            #keyboardpresses
+            elif e.type == p.KEYDOWN:
+
+                if e.key == p.K_TAB:
+                    settings.state = 3 if settings.state == 0 else 0
+          
 
 
 
-def draw(screen, gs):
+def draw(screen, gs, font, edit):
     draw_background(screen, gs)
     draw_edit_photo(screen)
+    draw_editing(screen, font, edit)
+
 
 
 def draw_background(screen, gs):
@@ -129,6 +159,67 @@ def draw_background(screen, gs):
 
 def draw_edit_photo(screen):
     screen.blit(original_image, (BOARD_WIDTH, 0))
+
+def draw_editing(screen, font, edit):
+    text = "upper" if edit else "under"
+    x, y = BOARD_WIDTH + EDIT_PANEL_WIDTH - 100, BOARD_HEIGHT-100
+    p.draw.rect(screen, "black", (x-20, y-20, 40, 40))
+    draw_text(screen, text, font, x, y)
+
+def draw_map(screen, gs):
+    width = 50
+    x, y = BOARD_WIDTH // 2 -width//2, BOARD_WIDTH // 2 -width//2
+    # p.draw.rect(screen, "black", (x, y, width, width)) 
+    for map in gs.map_dict[gs.curr_level]:
+        map_x = int(map[0])
+        map_y = int(map[-1])
+        color = "red" if map == gs.curr_map else "black"
+        draw_rect_with_borders(screen, color, "white", x+map_x*width, y-map_y*width, width, width)
+
+def draw_rect_with_borders(screen, color, color_border, x, y, width, height):
+    p.draw.rect(screen, color, (x,y,width,height), 0)
+    for i in range(4):
+        p.draw.rect(screen, color_border, (x-i,y-i,width,height), 1)
+
+def map_menu(screen, font, gs, settings):
+    button_pressed = False
+    new_level = None
+    new_map = None
+    y = 0
+    x = 50
+    height = 20
+    draw_text(screen, "LEVELS", font, x, y)
+    y += height
+    for level in gs.map_dict:
+        img = get_text_as_img(level, font)
+        if Button(screen, x, y, img, img.get_width(), img.get_height()).draw(settings):
+            print(level)
+            button_pressed = True
+            new_level = level
+        y += height
+    y += height
+
+    draw_text(screen, "MAPS", font, x, y)
+    y += height
+    for map in gs.map_dict[gs.curr_level]:
+        img = get_text_as_img(map, font)
+        if Button(screen, x, y, img, img.get_width(), img.get_height()).draw(settings):
+            print(map)
+            button_pressed = True
+            new_map = map
+        y += height
+    y += height
+
+    if button_pressed:
+        if new_level:
+            gs.load_current_map(new_level, "0, 0")
+            gs.curr_level = new_level
+
+        elif new_map:
+            gs.load_current_map(gs.curr_level, new_map)
+            gs.curr_map = new_map
+
+
 
 if __name__ == "__main__":
     main()

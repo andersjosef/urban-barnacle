@@ -28,6 +28,8 @@ sq_selected = () #no square is selected, keep track of last click of the user (t
 def main():
     p.init()
     font = p.font.SysFont("Helvetica", 16, True, False) #12 size original 16 good
+    font_big = p.font.SysFont("Helvetica", 32, True, False) #12 size original 16 good
+
     screen = p.display.set_mode((BOARD_WIDTH + EDIT_PANEL_WIDTH, BOARD_HEIGHT))
     clock = p.time.Clock()
 
@@ -57,7 +59,7 @@ def main():
         if settings.state == 4: # map
             screen.fill((0, 0, 100), (0, 0, BOARD_WIDTH, BOARD_HEIGHT))
             event_handler_map(settings, gs) # må endres senere!!
-            draw_map(screen, gs)
+            draw_map(screen, gs, font_big, settings)
             map_menu(screen, font, gs, settings)
 
         clock.tick(MAX_FPS)
@@ -166,7 +168,8 @@ def draw_editing(screen, font, edit):
     p.draw.rect(screen, "black", (x-20, y-20, 40, 40))
     draw_text(screen, text, font, x, y)
 
-def draw_map(screen, gs):
+def draw_map(screen, gs, font, settings):
+    liste = [(0, 1), (1, 0), (0, -1), (-1, 0)]
     width = 50
     x, y = BOARD_WIDTH // 2 -width//2, BOARD_WIDTH // 2 -width//2
     # p.draw.rect(screen, "black", (x, y, width, width)) 
@@ -175,6 +178,18 @@ def draw_map(screen, gs):
         map_y = int(map[-1])
         color = "red" if map == gs.curr_map else "black"
         draw_rect_with_borders(screen, color, "white", x+map_x*width, y-map_y*width, width, width)
+
+        # add pluss button
+        for thing in liste:
+            meta_x, meta_y = map.strip().split(", ")
+            meta_x, meta_y = int(meta_x), int(meta_y)
+            meta_x = meta_x + thing[0]
+            meta_y = meta_y + thing[1]
+            string = f"{meta_x}, {meta_y}"
+            if string not in gs.map_dict[gs.curr_level]:
+                img = get_text_as_img("+", font)
+                if Button(screen, x + width*meta_x, y - width*meta_y, img, width, width).draw(settings):
+                    print(f"{string}")
 
 def draw_rect_with_borders(screen, color, color_border, x, y, width, height):
     p.draw.rect(screen, color, (x,y,width,height), 0)

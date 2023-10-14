@@ -9,3 +9,4 @@ todo
 - rydde litt opp i map/curr_map...
 
 - legge til en 3. invis layer med blocker en ikke kan gå igjennom
+- legge til maps fra map på editor

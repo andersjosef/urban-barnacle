@@ -54,9 +54,9 @@ def main():
             screen.fill((79, 161, 101), (0, 0, BOARD_WIDTH, BOARD_HEIGHT))
             event_handler(settings, gs)
             draw(screen, gs, font, settings.is_edit_upper)
-        if settings.state == 3: # map
+        if settings.state == 4: # map
             screen.fill((0, 0, 100), (0, 0, BOARD_WIDTH, BOARD_HEIGHT))
-            event_handler(settings, gs) # må endres senere!!
+            event_handler_map(settings, gs) # må endres senere!!
             draw_map(screen, gs)
             map_menu(screen, font, gs, settings)
 
@@ -118,7 +118,7 @@ def event_handler(settings, gs):
                         print(f"saved map to level: {gs.curr_level}, map: {gs.curr_map}")
 
                 elif e.key == p.K_TAB:
-                    settings.state = 3 if settings.state == 0 else 0
+                    settings.state = 4 if settings.state == 0 else 0
 
 def event_handler_map(settings, gs):
     # global sq_selected
@@ -136,7 +136,7 @@ def event_handler_map(settings, gs):
             elif e.type == p.KEYDOWN:
 
                 if e.key == p.K_TAB:
-                    settings.state = 3 if settings.state == 0 else 0
+                    settings.state = 4 if settings.state == 0 else 0
           
 
 

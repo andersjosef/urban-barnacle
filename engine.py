@@ -35,7 +35,9 @@ class GameState():
         self.map = [0, 0]
         self.borders_exist = [False, False, False, False] # top, right, bottom, left
 
-
+        self.map_dict = {}
+        self.curr_level = "1"
+        self.curr_map = "0, 0"
         self.info_file = self.load_current_map(str(self.level), self.map) 
 
         ############################# SPRITES ADDED IN GAME#####################################
@@ -56,6 +58,7 @@ class GameState():
         cur_map = f"{map[0]}, {map[1]}"
         with open(f"data/maps/test.json", "r") as infile:
             dic =json.load(infile)
+            self.map_dict = dic
             self.check_borders_exist(dic[level], map)
             self.board_under = dic[level][cur_map]["under"]
             self.board_upper = dic[level][cur_map]["upper"]
@@ -164,6 +167,7 @@ class GameState():
             if action:
                 self.borders_exist = [False, False, False, False]
                 self.info_file = self.load_current_map(str(self.level), self.map)
+                self.curr_map = f"{self.map[0]}, {self.map[-1]}"
         else:
             if self.hero.x >= 50 and self.hero.x <= 700:
                 if self.hero.y >= 0 and self.hero.y <= 650:

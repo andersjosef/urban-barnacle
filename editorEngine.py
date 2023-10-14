@@ -5,12 +5,17 @@ class GameState():
     def __init__(self):
         # self.board_under = [["1, 4" for x in range(DIMENSION)] for x in range(DIMENSION)]
         # self.board_upper = [["--" for x in range(DIMENSION)] for x in range(DIMENSION)]
-        self.curr_map = "start"
+        self.map_dict = {}
+        self.curr_level = "1"
+        self.curr_map = "0, 0"
         self.load_current_map()
+        print(self.map_dict)
 
-    def load_current_map(self):
-        with open(f"data/maps/{self.curr_map}.json", "r") as infile:
+    def load_current_map(self, level="1", map="0, 0"):
+        with open(f"data/maps/test.json", "r") as infile:
             dic =json.load(infile)
-            self.board_under = dic["under"]
-            self.board_upper = dic["upper"]
+            self.map_dict = dic
+            board = dic[level][map]
+            self.board_under = board["under"]
+            self.board_upper = board["upper"]
 

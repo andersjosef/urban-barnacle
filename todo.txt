@@ -10,3 +10,4 @@ todo
 
 - legge til en 3. invis layer med blocker en ikke kan gå igjennom
 - legge til maps fra map på editor
+-  legg til i dict og bytt til current map

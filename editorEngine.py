@@ -9,7 +9,6 @@ class GameState():
         self.curr_level = "1"
         self.curr_map = "0, 0"
         self.load_current_map()
-        print(self.map_dict)
 
     def load_current_map(self, level="1", map="0, 0"):
         with open(f"data/maps/test.json", "r") as infile:

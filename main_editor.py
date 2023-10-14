@@ -190,6 +190,7 @@ def draw_map(screen, gs, font, settings):
                 img = get_text_as_img("+", font)
                 if Button(screen, x + width*meta_x, y - width*meta_y, img, width, width).draw(settings):
                     print(f"{string}")
+                    # legg til i dict og bytt til current map
 
 def draw_rect_with_borders(screen, color, color_border, x, y, width, height):
     p.draw.rect(screen, color, (x,y,width,height), 0)
